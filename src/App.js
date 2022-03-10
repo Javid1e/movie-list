@@ -1,4 +1,4 @@
-import React, { useState,useEffect,useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import AddMovie from "./components/AddMovie";
 import MoviesList from "./components/MoviesList";
 import "./App.css";
@@ -8,11 +8,13 @@ function App() {
   const [isLoaading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchMovieHanlder =useCallback( async () => {
+  const fetchMovieHanlder = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("https://swapi.dev/api/films/");
+      const response = await fetch(
+        "https://movie-list-1-b7719-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json"
+      );
       if (!response.ok) {
         throw new Error("Something went wrong!");
       }
@@ -30,10 +32,26 @@ function App() {
       setError(error.message);
     }
     setIsLoading(false);
-  },[]);
-  useEffect(()=>{
+  }, []);
+  useEffect(() => {
     fetchMovieHanlder();
-  },[fetchMovieHanlder]);
+  }, [fetchMovieHanlder]);
+
+  const addMovieHandler = useCallback(async (movie) => {
+    const response = await fetch(
+      "https://movie-list-1-b7719-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json",
+      {
+        method: "POST",
+        body: JSON.stringify(movie),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+    console.log(data);
+  }, []);
+
   let content = <p>Found No Movies.</p>;
   if (movies.length > 0) {
     content = <MoviesList movies={movies} />;
@@ -49,7 +67,7 @@ function App() {
   return (
     <React.Fragment>
       <section>
-        <AddMovie/>
+        <AddMovie onAddMovie={addMovieHandler} />
       </section>
       <section>
         <button onClick={fetchMovieHanlder}>Fetch Movies</button>
